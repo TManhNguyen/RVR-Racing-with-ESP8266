@@ -47,10 +47,8 @@ void loop() {
 
   if (avg_value == 0 && last_cm == 0 && last_last_cm == 0) {
     //    Serial.println("Turning_____________________________");
-    driveControl.setRawMotors(rawMotorModes::off, 0, rawMotorModes::off, 0);
-    delay(500);
     driveControl.setRawMotors(rawMotorModes::forward, 100, rawMotorModes::forward, 75);
-    delay(1000);
+    delay(750);
     driveControl.setRawMotors(rawMotorModes::off, 0, rawMotorModes::off, 0);
   }
 
@@ -58,12 +56,18 @@ void loop() {
     int off_set = (60 - avg_value) * 1.3;
     driveControl.setRawMotors(rawMotorModes::forward, 75 - off_set, rawMotorModes::forward, 75 + off_set);
     delay(150);
-  }  if (400 >= avg_value && avg_value > 180 && 400 >= avg_value && last_cm > 180) {
-    int off_set = (avg_value - 180);
+  }  if (400 >= avg_value && avg_value > 180 && 400 >= last_cm && last_cm > 180) {
+    int off_set = (avg_value - 180 * 1.1);
+    if (off_set > 50) {
+      off_set = 35;
+    }
     driveControl.setRawMotors(rawMotorModes::forward, 75 + off_set, rawMotorModes::forward, 75 - off_set);
     delay(150);
   }  if (180 >= avg_value && avg_value > 80 && 180 >= avg_value && last_cm > 80) {
-    int off_set = (avg_value - 90) * 1.3;
+    int off_set = (avg_value - 80) * 1.3;
+    if (off_set > 50) {
+      off_set = 35;
+    }
     driveControl.setRawMotors(rawMotorModes::forward, 75 + off_set, rawMotorModes::forward, 75 - off_set);
     delay(150);
   } if (60 <= this_cm && this_cm <= 80 && 60 <= last_cm && last_cm <= 80) {
