@@ -17,9 +17,10 @@ int filterArray[20];
 int last_last_cm = 0;
 int last_cm = 0;
 int this_cm = 0;
+int avg_value = 30;
 
 void setup() {
-//  Serial.begin(115200); // Open serial monitor at 115200 baud to see ping results.
+  //  Serial.begin(115200); // Open serial monitor at 115200 baud to see ping results.
   rvr.configUART(&Serial);
   driveControl = rvr.getDriveControl();
 }
@@ -28,7 +29,6 @@ void loop() {
   for (int sample = 0; sample < 20; sample++) {
     this_cm = sonar.ping_cm();
     filterArray[sample] = this_cm;
-    delay(5);
   }
   for (int i = 0; i < 19; i++) {
     for (int j = i + 1; j < 20; j++) {
@@ -43,29 +43,38 @@ void loop() {
   for (int sample = 7; sample < 17; sample++) {
     sum += filterArray[sample];
   }
-  int avg_value = sum / 10;
+  avg_value = sum / 10;
 
-  if (this_cm > 250 && last_cm > 250 && last_last_cm > 250) {
-//    Serial.println("Turning_____________________________");
+  if (avg_value == 0 && last_cm == 0 && last_last_cm == 0) {
+    //    Serial.println("Turning_____________________________");
     driveControl.setRawMotors(rawMotorModes::off, 0, rawMotorModes::off, 0);
-    driveControl.setHeading(0);
-    driveControl.rollStart(30, 64);
-    delay(800);
-    driveControl.rollStop(30);
-    delay(300);
+    delay(500);
+    driveControl.setRawMotors(rawMotorModes::forward, 100, rawMotorModes::forward, 75);
+    delay(1000);
+    driveControl.setRawMotors(rawMotorModes::off, 0, rawMotorModes::off, 0);
   }
 
-  int off_set = ((this_cm+last_cm)/2) - ((last_cm+last_last_cm)/2);
-  driveControl.setRawMotors(rawMotorModes::forward, 75 + (off_set * 2), rawMotorModes::forward, 75 - (off_set * 2));
-  delay(500);
+  if (0 < avg_value && avg_value < 60 && 0 < last_cm && last_cm < 60) {
+    int off_set = (60 - avg_value) * 1.3;
+    driveControl.setRawMotors(rawMotorModes::forward, 75 - off_set, rawMotorModes::forward, 75 + off_set);
+    delay(150);
+  }  if (400 >= avg_value && avg_value > 180 && 400 >= avg_value && last_cm > 180) {
+    int off_set = (avg_value - 180);
+    driveControl.setRawMotors(rawMotorModes::forward, 75 + off_set, rawMotorModes::forward, 75 - off_set);
+    delay(150);
+  }  if (180 >= avg_value && avg_value > 80 && 180 >= avg_value && last_cm > 80) {
+    int off_set = (avg_value - 90) * 1.3;
+    driveControl.setRawMotors(rawMotorModes::forward, 75 + off_set, rawMotorModes::forward, 75 - off_set);
+    delay(150);
+  } if (60 <= this_cm && this_cm <= 80 && 60 <= last_cm && last_cm <= 80) {
+    driveControl.setRawMotors(rawMotorModes::forward, 75, rawMotorModes::forward, 75);
+  }
 
   //Clear stack
   last_last_cm = last_cm;
-  last_cm = this_cm;
-  this_cm = 0;
+  last_cm = avg_value;
 
   // print the value to Serial Monitor
-//  Serial.print("average value: ");
-//  Serial.println(avg_value);
-
+  //  Serial.print("average value: ");
+  //  Serial.println(avg_value);
 }
