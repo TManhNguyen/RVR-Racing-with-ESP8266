@@ -47,6 +47,7 @@ void loop() {
   } if (a0 == HIGH && a1 == HIGH) {
     driveControl.setRawMotors(rawMotorModes::forward, 150, rawMotorModes::forward, 150);
     delay(1500);
+    driveControl.setRawMotors(rawMotorModes::off, 0, rawMotorModes::off, 0);
   }
 
 }
